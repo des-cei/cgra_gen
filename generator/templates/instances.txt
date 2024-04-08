@@ -1,0 +1,37 @@
+    processing_element
+    #(
+        .DATA_WIDTH     ( DATA_WIDTH )
+    )
+    PE_{0}
+    (
+        .clk            ( clk ),
+        .clk_bs         ( clk_bs ),
+        .rst_n          ( rst_n ),
+        .rst_bs         ( rst_bs ),
+        .config_bits    ( config_wire[95:0] ),
+        .catch_config   ( catch_config[{0}] ),
+        .north_din      ( {1}{4} ),
+        .north_din_v    ( {2}{4} ),
+        .north_din_r    ( {3}{4} ),
+        .east_din       ( {5}{8} ),
+        .east_din_v     ( {6}{8} ),
+        .east_din_r     ( {7}{8} ),
+        .south_din      ( {9}{12} ),
+        .south_din_v    ( {10}{12} ),
+        .south_din_r    ( {11}{12} ),
+        .west_din       ( {13}{16} ),
+        .west_din_v     ( {14}{16} ),
+        .west_din_r     ( {15}{16} ),
+        .north_dout     ( {17}{20} ),
+        .north_dout_v   ( {18}{20} ),
+        .north_dout_r   ( {19}{20} ),
+        .east_dout      ( {21}{24} ),
+        .east_dout_v    ( {22}{24} ),
+        .east_dout_r    ( {23}{24} ),
+        .south_dout     ( {25}{28} ),
+        .south_dout_v   ( {26}{28} ),
+        .south_dout_r   ( {27}{28} ),
+        .west_dout      ( {29}{32} ),
+        .west_dout_v    ( {30}{32} ),
+        .west_dout_r    ( {31}{32} )
+    );

@@ -1,0 +1,41 @@
+# Copyright 2024 CEI-UPM
+# Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
+# SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+# Daniel Vazquez (daniel.vazquez@upm.es)
+
+# PE number
+position: 0
+
+# Processing element configuration
+# Fork senders
+fs_n: 0b00000 # Fork sender North : din_1_r | din_2_r | east_REG_din_r  | south_REG_din_r | west_REG_din_r
+fs_e: 0b00000 # Fork sender East :  din_1_r | din_2_r | north_REG_din_r | south_REG_din_r | west_REG_din_r
+fs_s: 0b00000 # Fork sender South : din_1_r | din_2_r | north_REG_din_r | east_REG_din_r  | west_REG_din_r
+fs_w: 0b00000 # Fork sender West :  din_1_r | din_2_r | north_REG_din_r | east_REG_din_r  | south_REG_din_r
+
+# Multiplexers
+sel_n: 0 # Mux selector North : west_buffer (3)  | south_buffer (2) | east_buffer (1)  | FU_dout (0)
+sel_e: 0 # Mux selector East :  west_buffer (3)  | south_buffer (2) | north_buffer (1) | FU_dout (0)
+sel_s: 0 # Mux selector South : west_buffer (3)  | east_buffer (2)  | north_buffer (1) | FU_dout (0)
+sel_w: 0 # Mux selector West :  south_buffer (3) | east_buffer (2)  | north_buffer (1) | FU_dout (0)
+
+# Processing cell configuration (addsub, muldiv, logical)
+# Multiplexers
+sel_pc_1: 0 # Mux selector FU1 : I1_const (4) | west_din (3) | south_din (2) | east_din (1) | north_din (0)
+sel_pc_2: 0 # Mux selector FU2 : I1_const (4) | west_din (3) | south_din (2) | east_din (1) | north_din (0)
+
+# Fork senders
+fs_pc: 0b0000 # Fork sender FU : north_dout_r | east_dout_r | south_dout_r | west_dout_r
+
+# Constant
+const: 0
+
+# Iterations reset
+it_rst: 0
+
+# Loop source : without feedback loop (0) | with feedback loop {scalar from datapath 2} (1)
+feedback: 0
+
+# Operation
+#      substract (2) | multiply (1) | add (0)
+op: 0

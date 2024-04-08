@@ -1,0 +1,69 @@
+// Copyright 2024 CEI-UPM
+// Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
+// SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+// Daniel Vazquez (daniel.vazquez@upm.es)
+
+module CGRA
+    #(
+        parameter int DATA_WIDTH = 32
+    )
+    (
+        // Clock and reset
+        input  logic                        clk,
+        input  logic                        clk_bs,
+        input  logic                        rst_n,
+        input  logic                        rst_bs,
+
+        // Input data
+        input  logic [{0}:0]     data_in,
+        input  logic [{1}:0]                  data_in_valid,
+        output logic [{1}:0]                  data_in_ready,
+
+        // Output data
+        output logic [{2}:0]     data_out,
+        output logic [{3}:0]                  data_out_valid,
+        input  logic [{3}:0]                  data_out_ready,
+
+        // Configuration
+        input  logic [127:0]                config_bitstream
+    );
+
+    // Config signals
+    logic [95:0]    config_wire;
+    logic [{4}:0]    catch_config;
+
+    // Internal data signals
+    logic [{3}:0][{5}:0][DATA_WIDTH-1:0] hor_we, hor_ew;
+    logic [{3}:0][{5}:0]                 hor_we_v, hor_we_r, hor_ew_v, hor_ew_r;
+    logic [{6}:0][{1}:0][DATA_WIDTH-1:0] ver_ns, ver_sn;
+    logic [{6}:0][{1}:0]                 ver_ns_v, ver_ns_r, ver_sn_v, ver_sn_r;
+
+    // External data signals
+    logic [{1}:0][DATA_WIDTH-1:0] wire_din;
+    logic [{1}:0]                 wire_din_v, wire_din_r;
+    logic [{3}:0][DATA_WIDTH-1:0] wire_dout;
+    logic [{3}:0]                 wire_dout_v, wire_dout_r;
+
+    // Bitstream decoding
+    assign config_wire = config_bitstream[95:0];
+
+    always_comb begin
+        for (int unsigned i = 0; i < {9}; i++) begin
+            if (config_bitstream[111:96] == i[15:0] && config_bitstream[112])   catch_config[i] = 1'b1;
+            else                                                                catch_config[i] = 1'b0;
+        end
+    end
+
+    // Split inputs
+    for (genvar i = 0; i < {7}; i++) begin
+        assign wire_din[i]     = data_in[(i+1)*DATA_WIDTH-1:i*DATA_WIDTH];
+        assign wire_din_v[i]   = data_in_valid[i];
+        assign data_in_ready[i] = wire_din_r[i];
+    end
+
+    // Split outputs
+    for (genvar i = 0; i < {8}; i++) begin
+        assign data_out[(i+1)*DATA_WIDTH-1:i*DATA_WIDTH] = wire_dout[i];
+        assign data_out_valid[i] = wire_dout_v[i];
+        assign wire_dout_r[i] = data_out_ready[i];
+    end
