@@ -1,0 +1,4 @@
+rtl/generated/
+tb/obj_dir/
+*.stamp.verilate
+*.vcd
