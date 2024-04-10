@@ -1,0 +1,10 @@
+name: cgra-gen
+
+channels:
+  - conda-forge
+
+dependencies:
+  - python=3.10
+  - pyyaml
+  - verilator==5.022
+  - gtkwave

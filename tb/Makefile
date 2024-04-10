@@ -39,7 +39,7 @@ waveform.vcd: ./obj_dir/V$(TOP_MODULE)
 .stamp.verilate: $(TOP_MODULE).sv $(PROJECT)_tb.cpp
 	@echo
 	@echo "### VERILATING ###"
-	verilator -Wall --trace -Wno-PINCONNECTEMPTY -Wno-UNUSED -cc $(TOP_MODULE).sv $(MODULES) --exe $(PROJECT)_tb.cpp
+	verilator -Wall --trace -Wno-PINCONNECTEMPTY -Wno-GENUNNAMED -Wno-UNUSED -cc $(TOP_MODULE).sv $(MODULES) --exe $(PROJECT)_tb.cpp
 	@touch .stamp.verilate
 
 .PHONY:lint
