@@ -1,5 +1,5 @@
 // Copyright 2024 CEI-UPM
-// Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
+// Solderpad Hardware License, Version 2.1, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 // Daniel Vazquez (daniel.vazquez@upm.es)
 
