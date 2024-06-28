@@ -23,7 +23,7 @@ module mux
     always_comb begin
         mux_out = '0;
         for (int unsigned i = 0; i < NUM_INPUTS; i++) begin
-            if (sel == $bits(sel)'(i)) mux_out = inputs[i];
+            if (sel == i[$bits(sel)-1:0]) mux_out = inputs[i];
         end
     end
 

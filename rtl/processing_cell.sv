@@ -57,7 +57,7 @@ module processing_cell
     assign iterations_reset = config_bits[25:10];
     assign feedback         = config_bits[26:26];
     assign op_config        = config_bits[30:27];
-    assign I1_const         = DATA_WIDTH'(signed'(config_bits[63:32]));
+    assign I1_const         = $unsigned(DATA_WIDTH'(signed'(config_bits[63:32])));
 
     // Data path in 1
     mux
