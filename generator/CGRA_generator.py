@@ -44,12 +44,12 @@ def get_north_in(row, column):
     PE_number = column + row * rows
     for pos in inputs_pos:
         if pos[1] == "N" and int(pos[2:]) == PE_number:
-            return ["wire_din", "wire_din_v", "wire_din_r", "[{}]".format(pos[0])]
+            return ["wire_din", "wire_din_v", "wire_din_r", "[{}]".format(pos[0]), "config_en"]
 
     if row == 0:
-        return [zero_word, zero_bit, "", ""]
+        return [zero_word, zero_bit, "", "", zero_bit]
     else:
-        return ["ver_sn", "ver_sn_v", "ver_sn_r", "[{}][{}]".format(row-1, column)]
+        return ["ver_sn", "ver_sn_v", "ver_sn_r", "[{}][{}]".format(row-1, column), "config_en_ns"]
 
 
 def get_east_in(row, column):
@@ -116,12 +116,12 @@ def get_south_out(row, column):
     PE_number = column + row * rows
     for pos in outputs_pos:
         if pos[1] == "S" and int(pos[2:]) == PE_number:
-            return ["wire_dout", "wire_dout_v", "wire_dout_r", "[{}]".format(pos[0])] 
+            return ["wire_dout", "wire_dout_v", "wire_dout_r", "[{}]".format(pos[0]), "", ""] 
 
     if row == rows - 1:
-        return ["", "", zero_bit, ""]
+        return ["", "", zero_bit, "", "", ""]
     else:
-        return ["ver_sn", "ver_sn_v", "ver_sn_r", "[{}][{}]".format(row, column)]
+        return ["ver_sn", "ver_sn_v", "ver_sn_r", "[{}][{}]".format(row, column), "config_en_ns", "[{}][{}]".format(row, column)]
 
 
 def get_west_out(row, column):
@@ -162,7 +162,7 @@ for i in range(0, columns):
 endmodule = "endmodule\n"
 
 # Write file
-file = open("rtl/generated/CGRA.sv", "w")
+file = open("rtl/CGRA.sv", "w")
 n = "\n\n"
 file.write(ports + n + PEs + endmodule)
 file.close()

@@ -5,14 +5,15 @@
 
 module CGRA
     #(
-        parameter int DATA_WIDTH = 32
+        parameter int DATA_WIDTH = 8,
+        parameter string CONFIG_BORDER = "north"
     )
     (
         // Clock and reset
         input  logic                        clk,
-        input  logic                        clk_bs,
         input  logic                        rst_n,
-        input  logic                        rst_bs,
+        input  logic                        clr_data,
+        input  logic                        clr_config,
 
         // Input data
         input  logic [{0}:0]     data_in,
@@ -25,12 +26,11 @@ module CGRA
         input  logic [{3}:0]                  data_out_ready,
 
         // Configuration
-        input  logic [127:0]                config_bitstream
+        input  logic [{1}:0]                  config_en
     );
 
-    // Config signals
-    logic [95:0]    config_wire;
-    logic [{4}:0]    catch_config;
+    // Internal config signals
+    logic [{6}:0][{1}:0] config_en_ns;
 
     // Internal data signals
     logic [{3}:0][{5}:0][DATA_WIDTH-1:0] hor_we, hor_ew;
@@ -43,16 +43,6 @@ module CGRA
     logic [{1}:0]                 wire_din_v, wire_din_r;
     logic [{3}:0][DATA_WIDTH-1:0] wire_dout;
     logic [{3}:0]                 wire_dout_v, wire_dout_r;
-
-    // Bitstream decoding
-    assign config_wire = config_bitstream[95:0];
-
-    always_comb begin
-        for (int unsigned i = 0; i < {9}; i++) begin
-            if (config_bitstream[111:96] == i[15:0] && config_bitstream[112])   catch_config[i] = 1'b1;
-            else                                                                catch_config[i] = 1'b0;
-        end
-    end
 
     // Split inputs
     for (genvar i = 0; i < {7}; i++) begin

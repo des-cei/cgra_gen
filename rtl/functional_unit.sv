@@ -11,6 +11,7 @@ module functional_unit
         // Clock and reset
         input  logic                    clk,
         input  logic                    rst_n,
+        input  logic                    clr,
 
         // Input data
         input  logic [DATA_WIDTH-1:0]   din_1,
@@ -29,6 +30,8 @@ module functional_unit
         input  logic [15:0]             delay_value,
         input  logic [3:0]              alu_sel
     );
+
+    // synopsys sync_set_reset clr
 
     logic [DATA_WIDTH-1:0]  alu_din_2, alu_dout;
     logic [15:0]            delay_count;
@@ -62,25 +65,33 @@ module functional_unit
             initial_load <= 1'b0;
             delay_count <= 16'h0;
         end else begin
-            // Data process
-            if(!initial_load && feedback) begin
-                dout <= initial_value;
-                initial_load <= 1'b1;
-            end else if(din_v && dout_r) begin
-                dout <= alu_dout;
-            end
+            if (clr) begin
+                dout <= '0;
+                dout_v_reg <= 1'b0;
+                dout_v_delay <= 1'b0;
+                initial_load <= 1'b0;
+                delay_count <= 16'h0;
+            end else begin
+                // Data process
+                if(!initial_load && feedback) begin
+                    dout <= initial_value;
+                    initial_load <= 1'b1;
+                end else if(din_v && dout_r) begin
+                    dout <= alu_dout;
+                end
 
-            // Valid process
-            dout_v_reg <= din_v;
-            dout_v_delay <= 1'b0;
+                // Valid process
+                dout_v_reg <= din_v;
+                dout_v_delay <= 1'b0;
 
-            if(feedback && din_v && dout_r && initial_load) begin
-                if(delay_count + 1 == delay_value) begin
-                    delay_count <= 16'h0;
-                    dout_v_delay <= 1'b1;
-                    initial_load <= 1'b0;
-                end else begin
-                    delay_count <= delay_count + 1;
+                if(feedback && din_v && dout_r && initial_load) begin
+                    if(delay_count + 1 == delay_value) begin
+                        delay_count <= 16'h0;
+                        dout_v_delay <= 1'b1;
+                        initial_load <= 1'b0;
+                    end else begin
+                        delay_count <= delay_count + 1;
+                    end
                 end
             end
         end

@@ -11,6 +11,7 @@ module processing_cell
         // Clock and reset
         input  logic                    clk,
         input  logic                    rst_n,
+        input  logic                    clr,
 
         // Input data
         input  logic [DATA_WIDTH-1:0]   north_din,
@@ -92,6 +93,7 @@ module processing_cell
     (
         .clk        ( clk           ),
         .rst_n      ( rst_n         ),
+        .clr        ( clr           ),
         .din        ( EB_din_1      ),
         .din_v      ( EB_din_1_v    ),
         .din_r      ( din_1_r       ),
@@ -133,6 +135,7 @@ module processing_cell
     (
         .clk        ( clk           ),
         .rst_n      ( rst_n         ),
+        .clr        ( clr           ),
         .din        ( EB_din_2      ),
         .din_v      ( EB_din_2_v    ),
         .din_r      ( din_2_r       ),
@@ -169,6 +172,7 @@ module processing_cell
     (
         .clk                ( clk               ),
         .rst_n              ( rst_n             ),
+        .clr                ( clr               ),
         .din_1              ( join_dout_1       ),
         .din_2              ( join_dout_2       ),
         .din_v              ( join_dout_v       ),

@@ -11,6 +11,7 @@ module elastic_buffer
         // Clock and reset
         input  logic                    clk,
         input  logic                    rst_n,
+        input  logic                    clr,
 
         // Input data
         input  logic [DATA_WIDTH-1:0]   din,
@@ -23,6 +24,8 @@ module elastic_buffer
         input  logic                    dout_r
     );
 
+    // synopsys sync_set_reset clr
+
     logic [DATA_WIDTH-1 : 0]    data_0, data_1;
     logic                       valid_0, valid_1;
     logic                       areg, vaux;
@@ -33,19 +36,30 @@ module elastic_buffer
             data_1  <= '0;
             valid_0 <= 1'b0;
             valid_1 <= 1'b0;
-        end else if (areg) begin
-            data_0  <= din;
-            data_1  <= data_0;
-            valid_0 <= din_v;
-            valid_1 <= valid_0;
+        end else begin
+            if (clr) begin
+                data_0  <= '0;
+                data_1  <= '0;
+                valid_0 <= 1'b0;
+                valid_1 <= 1'b0;
+            end else if (areg) begin
+                data_0  <= din;
+                data_1  <= data_0;
+                valid_0 <= din_v;
+                valid_1 <= valid_0;
+            end
         end
     end
 
     always_ff @(posedge clk or negedge rst_n) begin
         if(!rst_n) begin
-            areg    <= 1'b0;
+            areg <= 1'b0;
         end else begin
-            areg <= dout_r || !vaux;
+            if (clr) begin
+                areg <= 1'b0;
+            end else begin
+                areg <= dout_r || !vaux;
+            end
         end
     end
 

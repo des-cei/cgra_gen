@@ -5,14 +5,15 @@
 
 module processing_element
     #(
-        parameter int DATA_WIDTH = 32
+        parameter int DATA_WIDTH = 32,
+        parameter string CONFIG_BORDER = "north"
     )
     (
         // Clock and reset
         input  logic                    clk,
-        input  logic                    clk_bs,
         input  logic                    rst_n,
-        input  logic                    rst_bs,
+        input  logic                    clr_data,
+        input  logic                    clr_config,
 
         // Input data
         input  logic [DATA_WIDTH-1:0]   north_din,
@@ -43,34 +44,104 @@ module processing_element
         input  logic                    west_dout_r,
 
         // Configuration
-        input  logic [95:0]             config_bits,
-        input  logic                    catch_config
+        input  logic                    config_en_i,
+        output logic                    config_en_o
     );
 
     // Config signals
-    logic [1:0]             mux_sel_n, mux_sel_e, mux_sel_s, mux_sel_w;
-    logic [4:0]             mask_fs_n, mask_fs_e, mask_fs_s, mask_fs_w;
-    logic [95:0]            config_reg;
+    logic [1:0]                         mux_sel_n, mux_sel_e, mux_sel_s, mux_sel_w;
+    logic [4:0]                         mask_fs_n, mask_fs_e, mask_fs_s, mask_fs_w;
+    logic [95:0]                        config_wire, config_reg;
+    logic                               tmp_north_din_v, tmp_east_din_v, tmp_south_din_v, tmp_west_din_v;
+    logic [DATA_WIDTH-1:0]              tmp_north_dout, tmp_east_dout, tmp_south_dout, tmp_west_dout;
+    logic [$clog2(96/DATA_WIDTH)-1:0]   config_cnt;
 
     // Interconnect signals
     // Buffer
     logic [DATA_WIDTH-1:0]  north_buffer, east_buffer, south_buffer, west_buffer;
     logic                   north_buffer_v, east_buffer_v, south_buffer_v, west_buffer_v;
-    logic                   temp_north_buffer_v, temp_east_buffer_v, temp_south_buffer_v, temp_west_buffer_v;
+    logic                   tmp_north_buffer_v, tmp_east_buffer_v, tmp_south_buffer_v, tmp_west_buffer_v;
     logic                   north_buffer_r, east_buffer_r, south_buffer_r, west_buffer_r;
     // Processing cell
     logic                   din_1_r, din_2_r;
     logic [DATA_WIDTH-1:0]  dout;
     logic                   dout_v;
 
-    // Configuration register
-    always_ff @(posedge clk_bs or posedge rst_bs) begin
-        if(rst_bs) begin
+    // Configuration signals
+    generate
+        if (CONFIG_BORDER == "north") begin
+            assign config_wire = {north_din, config_reg[95:DATA_WIDTH]};
+            assign tmp_north_din_v = north_din_v && !config_en_i;
+            assign tmp_east_din_v  = east_din_v;
+            assign tmp_south_din_v = south_din_v;
+            assign tmp_west_din_v  = west_din_v;
+            assign north_dout = tmp_north_dout;
+            assign east_dout  = tmp_east_dout;
+            assign south_dout = config_en_i ? north_din : tmp_south_dout;
+            assign west_dout  = tmp_west_dout;
+        end else if (CONFIG_BORDER == "east") begin
+            assign config_wire = { east_din, config_reg[95:DATA_WIDTH]};
+            assign tmp_north_din_v = north_din_v;
+            assign tmp_east_din_v  = east_din_v && !config_en_i;
+            assign tmp_south_din_v = south_din_v;
+            assign tmp_west_din_v  = west_din_v;
+            assign north_dout = tmp_north_dout;
+            assign east_dout  = tmp_east_dout;
+            assign south_dout = tmp_south_dout;
+            assign west_dout  = config_en_i ? east_din : tmp_west_dout;
+        end else if (CONFIG_BORDER == "south") begin
+            assign config_wire = {south_din, config_reg[95:DATA_WIDTH]};
+            assign tmp_north_din_v = north_din_v;
+            assign tmp_east_din_v  = east_din_v;
+            assign tmp_south_din_v = south_din_v && !config_en_i;
+            assign tmp_west_din_v  = west_din_v;
+            assign north_dout = config_en_i ? south_din : tmp_north_dout;
+            assign east_dout  = tmp_east_dout;
+            assign south_dout = tmp_south_dout;
+            assign west_dout  = tmp_west_dout;
+        end else if (CONFIG_BORDER == "west") begin
+            assign config_wire = { west_din, config_reg[95:DATA_WIDTH]};
+            assign tmp_north_din_v = north_din_v;
+            assign tmp_east_din_v  = east_din_v;
+            assign tmp_south_din_v = south_din_v;
+            assign tmp_west_din_v  = west_din_v && !config_en_i;
+            assign north_dout = tmp_north_dout;
+            assign east_dout  = config_en_i ? west_din : tmp_east_dout;
+            assign south_dout = tmp_south_dout;
+            assign west_dout  = tmp_west_dout;
+        end else begin // north default
+            assign config_wire = {north_din, config_reg[95:DATA_WIDTH]};
+            assign tmp_north_din_v = north_din_v && !config_en_i;
+            assign tmp_east_din_v  = east_din_v;
+            assign tmp_south_din_v = south_din_v;
+            assign tmp_west_din_v  = west_din_v;
+            assign north_dout = tmp_north_dout;
+            assign east_dout  = tmp_east_dout;
+            assign south_dout = config_en_i ? north_din : tmp_south_dout;
+            assign west_dout  = tmp_west_dout;
+        end
+    endgenerate
+
+    // Configuration registers
+    // synopsys sync_set_reset clr_config
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
             config_reg <= 0;
-        end else if(catch_config) begin
-            config_reg <= config_bits;
+            config_cnt <= 0;
+        end else begin
+            if (clr_config) begin
+                config_reg <= 0;
+                config_cnt <= 0;               
+            end else if (config_en_i) begin
+                if (config_cnt < 96/DATA_WIDTH) begin
+                    config_reg <= config_wire;
+                    config_cnt <= config_cnt + 1;
+                end
+            end
         end
     end
+
+    assign config_en_o = config_en_i && config_cnt == 96/DATA_WIDTH;
 
     // Configuration decoding
     assign mask_fs_n = config_reg[4:0];
@@ -93,15 +164,16 @@ module processing_element
     (
         .clk        ( clk                   ),
         .rst_n      ( rst_n                 ),
+        .clr        ( clr_data              ),
         .din        ( north_din             ),
-        .din_v      ( north_din_v           ),
+        .din_v      ( tmp_north_din_v      ),
         .din_r      ( north_din_r           ),
         .dout       ( north_buffer          ),
-        .dout_v     ( temp_north_buffer_v   ),
+        .dout_v     ( tmp_north_buffer_v   ),
         .dout_r     ( north_buffer_r        )
     );
 
-    assign north_buffer_v   = temp_north_buffer_v && north_buffer_r;
+    assign north_buffer_v   = tmp_north_buffer_v && north_buffer_r;
 
     fork_sender
     #(
@@ -124,7 +196,7 @@ module processing_element
     (
         .sel        (   mux_sel_n                                       ),
         .mux_in     ( { west_buffer, south_buffer, east_buffer, dout }  ),
-        .mux_out    (   north_dout                                      )
+        .mux_out    (   tmp_north_dout                                  )
     );
 
     mux
@@ -152,15 +224,16 @@ module processing_element
     (
         .clk        ( clk                   ),
         .rst_n      ( rst_n                 ),
+        .clr        ( clr_data              ),
         .din        ( east_din              ),
-        .din_v      ( east_din_v            ),
+        .din_v      ( tmp_east_din_v        ),
         .din_r      ( east_din_r            ),
         .dout       ( east_buffer           ),
-        .dout_v     ( temp_east_buffer_v    ),
+        .dout_v     ( tmp_east_buffer_v     ),
         .dout_r     ( east_buffer_r         )
     );
 
-    assign east_buffer_v    = temp_east_buffer_v && east_buffer_r;
+    assign east_buffer_v    = tmp_east_buffer_v && east_buffer_r;
 
     fork_sender
     #(
@@ -183,7 +256,7 @@ module processing_element
     (
         .sel        (   mux_sel_e                                       ),
         .mux_in     ( { west_buffer, south_buffer, north_buffer, dout } ),
-        .mux_out    (   east_dout                                       )
+        .mux_out    (   tmp_east_dout                                   )
     );
 
     mux
@@ -211,15 +284,16 @@ module processing_element
     (
         .clk        ( clk                   ),
         .rst_n      ( rst_n                 ),
+        .clr        ( clr_data              ),
         .din        ( south_din             ),
-        .din_v      ( south_din_v           ),
+        .din_v      ( tmp_south_din_v       ),
         .din_r      ( south_din_r           ),
         .dout       ( south_buffer          ),
-        .dout_v     ( temp_south_buffer_v   ),
+        .dout_v     ( tmp_south_buffer_v    ),
         .dout_r     ( south_buffer_r        )
     );
 
-    assign south_buffer_v   = temp_south_buffer_v && south_buffer_r;
+    assign south_buffer_v   = tmp_south_buffer_v && south_buffer_r;
 
     fork_sender
     #(
@@ -242,7 +316,7 @@ module processing_element
     (
         .sel        (   mux_sel_s                                       ),
         .mux_in     ( { west_buffer, east_buffer, north_buffer, dout }  ),
-        .mux_out    (   south_dout                                      )
+        .mux_out    (   tmp_south_dout                                  )
     );
 
     mux
@@ -270,15 +344,16 @@ module processing_element
     (
         .clk        ( clk                   ),
         .rst_n      ( rst_n                 ),
+        .clr        ( clr_data              ),
         .din        ( west_din              ),
-        .din_v      ( west_din_v            ),
+        .din_v      ( tmp_west_din_v        ),
         .din_r      ( west_din_r            ),
         .dout       ( west_buffer           ),
-        .dout_v     ( temp_west_buffer_v    ),
+        .dout_v     ( tmp_west_buffer_v     ),
         .dout_r     ( west_buffer_r         )
     );
 
-    assign west_buffer_v    = temp_west_buffer_v && west_buffer_r;
+    assign west_buffer_v    = tmp_west_buffer_v && west_buffer_r;
 
     fork_sender
     #(
@@ -301,7 +376,7 @@ module processing_element
     (
         .sel        (   mux_sel_w                                       ),
         .mux_in     ( { south_buffer, east_buffer, north_buffer, dout } ),
-        .mux_out    (   west_dout                                       )
+        .mux_out    (   tmp_west_dout                                   )
     );
 
     mux
@@ -326,6 +401,7 @@ module processing_element
     (
         .clk            ( clk               ),
         .rst_n          ( rst_n             ),
+        .clr            ( clr_data          ),
         .north_din      ( north_buffer      ),
         .north_din_v    ( north_buffer_v    ),
         .east_din       ( east_buffer       ),

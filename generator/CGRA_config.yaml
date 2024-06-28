@@ -4,20 +4,16 @@
 # Daniel Vazquez (daniel.vazquez@upm.es)
 
 CGRA:
-  rows: 4
-  columns: 4
+  rows: 2
+  columns: 2
 
   inputs:
-    number: 4
+    number: 2
     positions:  # Input number (<10!!) | Input cardinal position | PE number
       - 0N0
       - 1N1
-      - 2N2
-      - 3N3
   outputs:
-    number: 4
+    number: 2
     positions:  # Output number (<10!!) | Output cardinal position | PE number
-      - 0S12
-      - 1S13
-      - 2S14
-      - 3S15
+      - 0S2
+      - 1S3
