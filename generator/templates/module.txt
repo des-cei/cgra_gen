@@ -5,7 +5,7 @@
 
 module CGRA
     #(
-        parameter int DATA_WIDTH = 8,
+        parameter int DATA_WIDTH = 32,
         parameter string CONFIG_BORDER = "north"
     )
     (
