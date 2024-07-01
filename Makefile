@@ -8,12 +8,11 @@ default: generate
 # Generate the CGRA
 .PHONY: generate
 generate:
-	if [ ! -d "rtl/generated" ]; then mkdir rtl/generated; fi
 	python3.10 generator/CGRA_generator.py
 
 .PHONY: clean_gen
 clean_gen:
-	if [ -d "rtl/generated" ]; then rm -R rtl/generated; fi
+	if [ "rtl/CGRA.sv" ]; then rm rtl/CGRA.sv; fi
 
 # Simulate the CGRA
 .PHONY: simulate

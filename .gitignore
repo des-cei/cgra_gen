@@ -1,4 +1,4 @@
-rtl/generated/
+*CGRA.sv
 tb/obj_dir/
 *.stamp.verilate
 *.vcd
