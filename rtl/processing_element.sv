@@ -77,7 +77,7 @@ module processing_element
             assign tmp_west_din_v  = west_din_v;
             assign north_dout = tmp_north_dout;
             assign east_dout  = tmp_east_dout;
-            assign south_dout = config_en_i ? north_din : tmp_south_dout;
+            assign south_dout = config_en_i ? config_reg[DATA_WIDTH-1:0] : tmp_south_dout;
             assign west_dout  = tmp_west_dout;
         end else if (CONFIG_BORDER == "east") begin
             assign config_wire = { east_din, config_reg[95:DATA_WIDTH]};
@@ -88,14 +88,14 @@ module processing_element
             assign north_dout = tmp_north_dout;
             assign east_dout  = tmp_east_dout;
             assign south_dout = tmp_south_dout;
-            assign west_dout  = config_en_i ? east_din : tmp_west_dout;
+            assign west_dout  = config_en_i ? config_reg[DATA_WIDTH-1:0] : tmp_west_dout;
         end else if (CONFIG_BORDER == "south") begin
             assign config_wire = {south_din, config_reg[95:DATA_WIDTH]};
             assign tmp_north_din_v = north_din_v;
             assign tmp_east_din_v  = east_din_v;
             assign tmp_south_din_v = south_din_v && !config_en_i;
             assign tmp_west_din_v  = west_din_v;
-            assign north_dout = config_en_i ? south_din : tmp_north_dout;
+            assign north_dout = config_en_i ? config_reg[DATA_WIDTH-1:0] : tmp_north_dout;
             assign east_dout  = tmp_east_dout;
             assign south_dout = tmp_south_dout;
             assign west_dout  = tmp_west_dout;
@@ -106,7 +106,7 @@ module processing_element
             assign tmp_south_din_v = south_din_v;
             assign tmp_west_din_v  = west_din_v && !config_en_i;
             assign north_dout = tmp_north_dout;
-            assign east_dout  = config_en_i ? west_din : tmp_east_dout;
+            assign east_dout  = config_en_i ? config_reg[DATA_WIDTH-1:0] : tmp_east_dout;
             assign south_dout = tmp_south_dout;
             assign west_dout  = tmp_west_dout;
         end else begin // north default
@@ -117,7 +117,7 @@ module processing_element
             assign tmp_west_din_v  = west_din_v;
             assign north_dout = tmp_north_dout;
             assign east_dout  = tmp_east_dout;
-            assign south_dout = config_en_i ? north_din : tmp_south_dout;
+            assign south_dout = config_en_i ? config_reg[DATA_WIDTH-1:0] : tmp_south_dout;
             assign west_dout  = tmp_west_dout;
         end
     endgenerate
@@ -133,8 +133,8 @@ module processing_element
                 config_reg <= 0;
                 config_cnt <= 0;               
             end else if (config_en_i) begin
+                config_reg <= config_wire;
                 if (config_cnt < 96/DATA_WIDTH) begin
-                    config_reg <= config_wire;
                     config_cnt <= config_cnt + 1;
                 end
             end
