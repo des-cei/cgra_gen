@@ -12,8 +12,7 @@ module CGRA
         // Clock and reset
         input  logic                        clk,
         input  logic                        rst_n,
-        input  logic                        clr_data,
-        input  logic                        clr_config,
+        input  logic                        clr,
 
         // Input data
         input  logic [{0}:0]     data_in,

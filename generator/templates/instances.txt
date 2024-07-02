@@ -7,8 +7,7 @@
     (
         .clk            ( clk ),
         .rst_n          ( rst_n ),
-        .clr_data       ( clr_data ),
-        .clr_config     ( clr_config ),
+        .clr            ( clr ),
         .config_en_i    ( {5}{4} ),
         .config_en_o    ( {30}{31} ),
         .north_din      ( {1}{4} ),

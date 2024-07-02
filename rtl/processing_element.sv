@@ -12,8 +12,7 @@ module processing_element
         // Clock and reset
         input  logic                    clk,
         input  logic                    rst_n,
-        input  logic                    clr_data,
-        input  logic                    clr_config,
+        input  logic                    clr,
 
         // Input data
         input  logic [DATA_WIDTH-1:0]   north_din,
@@ -123,20 +122,14 @@ module processing_element
     endgenerate
 
     // Configuration registers
-    // synopsys sync_set_reset clr_config
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             config_reg <= 0;
             config_cnt <= 0;
-        end else begin
-            if (clr_config) begin
-                config_reg <= 0;
-                config_cnt <= 0;               
-            end else if (config_en_i) begin
-                config_reg <= config_wire;
-                if (config_cnt < 96/DATA_WIDTH) begin
-                    config_cnt <= config_cnt + 1;
-                end
+        end else if (config_en_i) begin
+            config_reg <= config_wire;
+            if (config_cnt < 96/DATA_WIDTH) begin
+                config_cnt <= config_cnt + 1;
             end
         end
     end
@@ -164,12 +157,12 @@ module processing_element
     (
         .clk        ( clk                   ),
         .rst_n      ( rst_n                 ),
-        .clr        ( clr_data              ),
+        .clr        ( clr                   ),
         .din        ( north_din             ),
-        .din_v      ( tmp_north_din_v      ),
+        .din_v      ( tmp_north_din_v       ),
         .din_r      ( north_din_r           ),
         .dout       ( north_buffer          ),
-        .dout_v     ( tmp_north_buffer_v   ),
+        .dout_v     ( tmp_north_buffer_v    ),
         .dout_r     ( north_buffer_r        )
     );
 
@@ -224,7 +217,7 @@ module processing_element
     (
         .clk        ( clk                   ),
         .rst_n      ( rst_n                 ),
-        .clr        ( clr_data              ),
+        .clr        ( clr                   ),
         .din        ( east_din              ),
         .din_v      ( tmp_east_din_v        ),
         .din_r      ( east_din_r            ),
@@ -284,7 +277,7 @@ module processing_element
     (
         .clk        ( clk                   ),
         .rst_n      ( rst_n                 ),
-        .clr        ( clr_data              ),
+        .clr        ( clr                   ),
         .din        ( south_din             ),
         .din_v      ( tmp_south_din_v       ),
         .din_r      ( south_din_r           ),
@@ -344,7 +337,7 @@ module processing_element
     (
         .clk        ( clk                   ),
         .rst_n      ( rst_n                 ),
-        .clr        ( clr_data              ),
+        .clr        ( clr                   ),
         .din        ( west_din              ),
         .din_v      ( tmp_west_din_v        ),
         .din_r      ( west_din_r            ),
@@ -401,7 +394,7 @@ module processing_element
     (
         .clk            ( clk               ),
         .rst_n          ( rst_n             ),
-        .clr            ( clr_data          ),
+        .clr            ( clr               ),
         .north_din      ( north_buffer      ),
         .north_din_v    ( north_buffer_v    ),
         .east_din       ( east_buffer       ),
