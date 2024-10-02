@@ -73,7 +73,7 @@ module functional_unit
             // Valid process
             dout_v_reg <= din_v;
 
-            if(dour_r) begin
+            if(dout_r) begin
                 dout_v_delay <= 1'b0;
             end
 
