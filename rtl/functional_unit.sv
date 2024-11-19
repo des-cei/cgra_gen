@@ -71,11 +71,11 @@ module functional_unit
             end
 
             // Valid process
-            dout_v_reg <= din_v;
-
             if(dout_r) begin
-                dout_v_delay <= 1'b0;
+                 dout_v_reg <= din_v;
             end
+
+            dout_v_delay <= 1'b0;
 
             if(feedback && din_v && dout_r && initial_load) begin
                 if(delay_count + 1 == delay_value) begin
