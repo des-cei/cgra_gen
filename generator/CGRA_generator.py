@@ -162,7 +162,7 @@ for i in range(0, columns):
 endmodule = "endmodule\n"
 
 # Write file
-file = open("rtl/generated/CGRA.sv", "w")
+file = open("rtl/cgra.sv", "w")
 n = "\n\n"
 file.write(ports + n + PEs + endmodule)
 file.close()

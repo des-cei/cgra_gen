@@ -12,17 +12,13 @@ This repository contains an architectural template to generate and simulate elas
 
 ## Getting Started
 
-- Install [Miniconda](https://docs.conda.io/en/latest/miniconda.html#linux-installers) as described in the link.
-- Create the conda enviroment to install the repository requirements:
-
-	```bash
-	conda env create -f enviroment.yml
-	```
+- Install [X-HEEP dependencies](https://docs.conda.io/en/latest/miniconda.html#linux-installers) as described in the link.
 - Activate the enviroment before using the repository:
 
 	```bash
-	conda activate cgra-gen
+	conda activate core-v-mini-mcu
 	```
+- You will need Questasim to simulate the CGRA 
 
 ## Using the framework
 
@@ -31,7 +27,7 @@ This repository contains an architectural template to generate and simulate elas
 Change the CGRA size and define the number and position of the inputs and outputs of the CGRA in [CGRA configuration](./generator/CGRA_config.yaml). Execute the generator using make in the base path:
 
 ```bash
-make generate
+make cgra-gen
 ```
 
 ### Generate a PE configuration
@@ -49,12 +45,13 @@ You can group these configuration words to create a CGRA bitstream, as it can be
 Use the default bypassing bitstream or a custom one to test the CGRA in simulation. Execute the CGRA simulator using make in the base path:
 
 ```bash
-make simulate
+make questasim-sim
 ```
 
-If you want to display the waveform of the simulation execute:
+If you want to display the waveform of the simulation:
+
 ```bash
-make waves
+make run-app-gui-questasim
 ```
 
 ## License

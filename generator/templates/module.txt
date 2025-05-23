@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 // Daniel Vazquez (daniel.vazquez@upm.es)
 
-module CGRA
+module cgra
     #(
         parameter int DATA_WIDTH = 32
     )
@@ -55,15 +55,15 @@ module CGRA
     end
 
     // Split inputs
-    for (genvar i = 0; i < {7}; i++) begin
+    for (genvar i = 0; i < {7}; i++) begin : gen_split_inputs
         assign wire_din[i]     = data_in[(i+1)*DATA_WIDTH-1:i*DATA_WIDTH];
         assign wire_din_v[i]   = data_in_valid[i];
         assign data_in_ready[i] = wire_din_r[i];
-    end
+    end : gen_split_inputs
 
     // Split outputs
-    for (genvar i = 0; i < {8}; i++) begin
+    for (genvar i = 0; i < {8}; i++) begin : gen_split_outputs
         assign data_out[(i+1)*DATA_WIDTH-1:i*DATA_WIDTH] = wire_dout[i];
         assign data_out_valid[i] = wire_dout_v[i];
         assign wire_dout_r[i] = data_out_ready[i];
-    end
+    end : gen_split_outputs

@@ -3,56 +3,37 @@
 # SPDX-License-Identifier: Apache-2.0
 # Daniel Vazquez (daniel.vazquez@upm.es)
 
-default: generate
+FUSESOC := $(shell which fusesoc)
+PYTHON  := $(shell which python)
 
-# Generate the CGRA
-.PHONY: generate
-generate:
-	if [ ! -d "rtl/generated" ]; then mkdir rtl/generated; fi
-	python3.10 generator/CGRA_generator.py
+RTL_FILES := $(wildcard rtl/*.sv)
 
-.PHONY: clean_gen
-clean_gen:
-	if [ -d "rtl/generated" ]; then rm -R rtl/generated; fi
+verible:
+	@for file in $(RTL_FILES); do \
+		verible-verilog-format $$file --inplace \
+			--formal_parameters_indentation indent --named_parameter_indentation indent \
+			--named_port_indentation indent --port_declarations_indentation indent 2> /dev/null; \
+		verible-verilog-lint $$file --lint_fatal=false --parse_fatal=false; \
+	done
 
-# Simulate the CGRA
-.PHONY: simulate
-simulate:
-	+$(MAKE) -C tb/ sim
+cgra-gen:
+	$(PYTHON) generator/CGRA_generator.py
+	$(MAKE) verible
 
-.PHONY: waves
-waves:
-	+$(MAKE) -C tb/ waves
+questasim-sim: cgra-gen
+	$(FUSESOC) --cores-root . run --no-export --target=sim --tool=modelsim $(FUSESOC_FLAGS) --build ceiupm:systems:elastic-cgra ${FUSESOC_PARAM} 2>&1 | tee buildsim.log
+	$(MAKE) -C build/ceiupm_systems_elastic-cgra_0/sim-modelsim/ opt
 
-.PHONY: clean_sim
-clean_sim:
-	+$(MAKE) -C tb/ clean
+run-app-questasim:
+	$(MAKE) -C build/ceiupm_systems_elastic-cgra_0/sim-modelsim/ run RUN_OPT=1
 
-# Print bitstream
+run-app-gui-questasim:
+	$(MAKE) -C build/ceiupm_systems_elastic-cgra_0/sim-modelsim/ run-gui RUN_OPT=1
+
 .PHONY: bitstream
 bitstream:
-	python3.10 bitstream/PE_bsgen.py
+	$(PYTHON) bitstream/PE_bsgen.py
 
-# Clean
-.PHONY: clean
-clean: clean_gen clean_sim	
-	
-# Help
-HELP_COMMANDS = \
-"   help        = display this help" \
-" [ generate ]  = generates a CGRA as specified in the configuration file" \
-"   simulate    = compiles debug simulator and opens the waveform" \
-"   bitstream   = prints the bitstream of a PE type using the configuration file" \
-"   clean       = removes all" \
-"   clean-gen   = removes the CGRA generated file" \
-"   clean-sim   = removes simulator and simulator-generated files" \
-""
-HELP_LINES = "" \
-	" General commands:" \
-	" -----------------------------" \
-	$(HELP_COMMANDS) \
-	""
-
-.PHONY: help
-help:
-	@for line in $(HELP_LINES); do echo "$$line"; done
+clean:
+	rm -rf build/
+	rm -f rtl/cgra.sv

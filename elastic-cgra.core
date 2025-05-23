@@ -1,0 +1,69 @@
+CAPI=2:
+
+# Copyright 2022 EPFL
+# Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
+# SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+
+name: ceiupm:systems:elastic-cgra
+description: Elastic CGRA.
+
+filesets:
+  files_rtl_generic:
+    files:
+    - rtl/elastic_buffer.sv
+    - rtl/elastic_join.sv
+    - rtl/fork_sender.sv
+    - rtl/mux.sv
+    - rtl/functional_unit.sv
+    - rtl/processing_cell.sv
+    - rtl/processing_element.sv
+    - rtl/cgra.sv
+    file_type: systemVerilogSource
+
+  tb-sv:
+    files:
+    - tb/tb_cgra.sv
+    file_type: systemVerilogSource
+
+  pre_patch_modelsim_Makefile:
+      files:
+      - scripts/patch_modelsim_Makefile.py
+      file_type: user
+
+parameters:
+  VERILATOR:
+    datatype: bool
+    paramtype: vlogdefine
+    default: false
+
+scripts:
+  pre_patch_modelsim_Makefile:
+    cmd:
+    - python
+    - ../../../scripts/patch_modelsim_Makefile.py
+
+targets:
+  default: &default_target
+    filesets:
+    - files_rtl_generic
+    toplevel: [cgra]
+
+  sim:
+    <<: *default_target
+    default_tool: modelsim
+    filesets_append:
+    - tool_modelsim? (pre_patch_modelsim_Makefile)
+    - tool_modelsim? (tb-sv)
+    toplevel:
+    - tool_modelsim? (tb_cgra)
+    hooks:
+      pre_build:
+        - tool_modelsim? (pre_patch_modelsim_Makefile)
+    tools:
+      modelsim:
+        vlog_options:
+        - -override_timescale 1ns/1ps
+        - -suppress vlog-2583
+        - -suppress vlog-2577
+        - -pedanticerrors
+        - -define MODELSIM

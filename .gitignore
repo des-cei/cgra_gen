@@ -1,4 +1,3 @@
-rtl/generated/
-tb/obj_dir/
-*.stamp.verilate
-*.vcd
+rtl/cgra.sv
+build/
+*.log
